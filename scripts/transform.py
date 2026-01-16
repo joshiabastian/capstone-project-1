@@ -3,6 +3,10 @@ import re
 
 
 def transform_product(df):
+
+    # Drop Columns Unnamed: 0
+    df = df.drop(columns=["Unnamed: 0"])
+
     # --- CAST RATING & NO OF RATINGS ---
     df["ratings"] = pd.to_numeric(df["ratings"], errors="coerce")
     df["no_of_ratings"] = pd.to_numeric(
