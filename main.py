@@ -18,7 +18,7 @@ import pandas as pd
 reqruitment_df = extract_reqruitment(REQRUITMENT_PATH)
 
 # Transform Data
-df_req = transform_requirements(reqruitment_df)
+# df_req = transform_requirements(reqruitment_df)
 
 # Load Data ke folder
 # load_data(df_req, LOAD_DATA, "transformed_requitment.csv")
