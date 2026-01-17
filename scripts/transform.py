@@ -53,3 +53,51 @@ def transform_product(df):
     df.reset_index(drop=True, inplace=True)
 
     return df
+
+
+def transform_requirements(df):
+
+    # DROP UNNAMED
+    df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
+
+    # CAST RATING
+    df["company_rating"] = pd.to_numeric(df["company_rating"], errors="coerce")
+
+    # --- SALARY PARSER ---
+    def parse_salary(salary):
+        if pd.isna(salary):
+            return None, None, None, None
+
+        salary = str(salary)
+
+        # currency
+        currency = "$" if "$" in salary else "UNKNOWN"
+
+        # period
+        if "/hr" in salary:
+            period = "hourly"
+        elif "/yr" in salary:
+            period = "yearly"
+        else:
+            period = "unknown"
+
+        # numbers
+        nums = re.findall(r"\d+", salary)
+        nums = [int(n) * 1000 if "K" in salary else int(n) for n in nums]
+
+        if len(nums) == 1:
+            return nums[0], nums[0], currency, period
+        elif len(nums) >= 2:
+            return nums[0], nums[1], currency, period
+        else:
+            return None, None, currency, period
+
+    df[["salary_min", "salary_max", "salary_currency", "salary_period"]] = df[
+        "salary_estimate"
+    ].apply(lambda x: pd.Series(parse_salary(x)))
+
+    # OPTIONAL CLEANING
+    df["job_title"] = df["job_title"].str.strip()
+    df["company"] = df["company"].str.strip()
+
+    return df
