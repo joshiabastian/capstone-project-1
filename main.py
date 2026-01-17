@@ -15,7 +15,7 @@ import pandas as pd
 # load_data(df, LOAD_DATA, "transformed_product.csv")
 
 # Extract Data Product
-reqruitment_df = extract_reqruitment(REQRUITMENT_PATH)
+# reqruitment_df = extract_reqruitment(REQRUITMENT_PATH)
 
 # Transform Data
 # df_req = transform_requirements(reqruitment_df)
