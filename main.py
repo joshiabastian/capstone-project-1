@@ -4,24 +4,25 @@ from scripts.transform import transform_product, transform_requirements
 from scripts.load import load_data
 import pandas as pd
 
+# Proses Extract Data Product
 
-# Extract Data Product
-# product_df = extract_product(PRODUCT_PATH)
+# Extract
+product_df = extract_product(PRODUCT_PATH)
 
-# Transform Data
-# df = transform_product(product_df)
+# Transform
+df = transform_product(product_df)
 
-# Load Data ke folder
-# load_data(df, LOAD_DATA, "transformed_product.csv")
+# Load
+load_data(df, LOAD_DATA, "transformed_product.csv")
 
-# Extract Data Product
-# reqruitment_df = extract_reqruitment(REQRUITMENT_PATH)
+# Proses Extract Data Reqruitment
 
-# Transform Data
-# df_req = transform_requirements(reqruitment_df)
+# Extract
+reqruitment_df = extract_reqruitment(REQRUITMENT_PATH)
 
-# Load Data ke folder
-# load_data(df_req, LOAD_DATA, "transformed_requitment.csv")
+# Transform
+df_req = transform_requirements(reqruitment_df)
 
-df = pd.read_csv("output/transformed_requuitment.csv")
-print(df.info())
+# Load
+
+load_data(df_req, LOAD_DATA, "transformed_requitment.csv")
