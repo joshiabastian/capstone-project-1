@@ -4,59 +4,7 @@ import re
 from datetime import datetime
 
 
-# def transform_product(df: pd.DataFrame) -> pd.DataFrame:
-
-#     # Drop Columns Unnamed: 0
-#     df = df.drop(columns=["Unnamed: 0"])
-
-#     # --- CAST RATING & NO OF RATINGS ---
-#     df["ratings"] = pd.to_numeric(df["ratings"], errors="coerce")
-#     df["no_of_ratings"] = pd.to_numeric(
-#         df["no_of_ratings"].str.replace(",", ""), errors="coerce"
-#     )
-
-#     # --- SPLIT PRICE & CURRENCY (overwrite kolom harga) ---
-#     def extract_price(price):
-#         if pd.isna(price):
-#             return None, None
-#         # simbol currency pertama
-#         symbol_match = re.search(r"[₹$€]", str(price))
-#         currency = symbol_match.group(0) if symbol_match else "UNKNOWN"
-#         # angka saja
-#         value_str = re.sub(r"[^0-9]", "", str(price))
-#         value = int(value_str) if value_str else None
-#         return value, currency
-
-#     # discount_price
-#     df[["discount_price", "discount_price_currency"]] = df["discount_price"].apply(
-#         lambda x: pd.Series(extract_price(x))
-#     )
-
-#     # actual_price
-#     df[["actual_price", "actual_price_currency"]] = df["actual_price"].apply(
-#         lambda x: pd.Series(extract_price(x))
-#     )
-
-#     # --- DERIVE DISCOUNT ---
-#     df["discount_amount"] = df["actual_price"] - df["discount_price"]
-#     df["discount_percent"] = round(
-#         (df["discount_amount"] / df["actual_price"]) * 100, 2
-#     )
-
-#     # --- NORMALIZE CATEGORY (overwrite) ---
-#     df["main_category"] = df["main_category"].str.strip().str.title()
-#     df["sub_category"] = df["sub_category"].str.strip().str.title()
-
-#     # --- FLAG MISSING DATA ---
-#     df["has_discount"] = df["discount_price"].notna()
-#     df["has_rating"] = df["ratings"].notna()
-
-#     # --- RESET INDEX DEFAULT PANDAS ---
-#     df.reset_index(drop=True, inplace=True)
-
-#     return df
-
-
+# Transform Data Product
 def extract_price_and_currency(price_str):
     """
     Extract harga dan currency dari string price
@@ -110,25 +58,6 @@ def categorize_rating(rating):
         return "Fair"
     else:
         return "Poor"
-
-
-def categorize_price(price, quantiles):
-    """
-    Kategorikan harga berdasarkan quantiles
-    """
-    if pd.isna(price):
-        return "unknown"
-
-    q25, q50, q75 = quantiles
-
-    if price <= q25:
-        return "Budget"
-    elif price <= q50:
-        return "Mid-Range"
-    elif price <= q75:
-        return "Premium"
-    else:
-        return "Luxury"
 
 
 def transform_product(df: pd.DataFrame) -> pd.DataFrame:
@@ -240,25 +169,6 @@ def transform_product(df: pd.DataFrame) -> pd.DataFrame:
             categorize_rating
         )
 
-    # Price category (based on quantiles)
-    if "discount_price_value" in df_transformed.columns:
-        valid_prices = df_transformed["discount_price_value"].dropna()
-        if len(valid_prices) > 0:
-            q25 = valid_prices.quantile(0.25)
-            q50 = valid_prices.quantile(0.50)
-            q75 = valid_prices.quantile(0.75)
-            df_transformed["price_category"] = df_transformed[
-                "discount_price_value"
-            ].apply(lambda x: categorize_price(x, (q25, q50, q75)))
-
-    # Savings category
-    if "discount_percent" in df_transformed.columns:
-        df_transformed["savings_level"] = pd.cut(
-            df_transformed["discount_percent"],
-            bins=[-np.inf, 0, 10, 25, 50, np.inf],
-            labels=["No Discount", "Low", "Medium", "High", "Very High"],
-        )
-
     # --- 9. ADD DATA QUALITY FLAGS ---
     print("✓ Adding data quality flags")
 
@@ -288,11 +198,6 @@ def transform_product(df: pd.DataFrame) -> pd.DataFrame:
         ).round(0)
 
     # --- 10. CLEAN DATA ---
-    # Remove duplicates
-    duplicates = df_transformed.duplicated().sum()
-    if duplicates > 0:
-        df_transformed = df_transformed.drop_duplicates()
-        print(f"✓ Removed {duplicates} duplicate rows")
 
     # Strip whitespace from text columns
     text_cols = df_transformed.select_dtypes(include=["object"]).columns
@@ -494,12 +399,6 @@ def transform_requirements(df: pd.DataFrame) -> pd.DataFrame:
         df_transformed[col] = df_transformed[col].apply(
             lambda x: x.strip() if isinstance(x, str) else x
         )
-
-    # Remove duplicates
-    duplicates = df_transformed.duplicated().sum()
-    if duplicates > 0:
-        df_transformed = df_transformed.drop_duplicates()
-        print(f"✓ Removed {duplicates} duplicate rows")
 
     # --- 4. HANDLE MISSING VALUES ---
     # String columns → 'Unknown'
