@@ -1,4 +1,4 @@
-# Path untuk data product
+# Path data product
 
 PRODUCT_PATH = "data/data_products"
 
