@@ -1,7 +1,8 @@
 import pandas as pd
 import os
 
-# Load data
+# Load data product dan requitment
+
 
 def load_data(df, folder_path=None, file_name=None):
     """
